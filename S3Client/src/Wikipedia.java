@@ -11,6 +11,12 @@ import java.util.StringTokenizer;
 
 import org.jsoup.Jsoup;
 
+/*
+ * Wikipedia class to get data from Wikipedia
+ * Make request to Wikipedia + topic
+ * Download content of that wikipedia page
+ * Extract method uses Maui to extract keyword from downloaded content 
+ */
 public class Wikipedia {
 	ExtractKeyPhrases wikiExtractKeyPhrases;
 	final String endPoint = "http://en.wikipedia.org/wiki/";
@@ -22,7 +28,13 @@ public class Wikipedia {
 	ArrayList<String> result;
 	BufferedReader br;
 	String line;
+	HashMap<String, Float> wikiKey;
 
+	/*
+	 * Make request to Wikipedia page contain topic
+	 * Download content of that page if found
+	 * Store the data to a text file
+	 */
 	public String downloadWikiContent(String term) {
 		// TODO Auto-generated method stub
 		System.out.println("extracting wiki");
@@ -43,6 +55,10 @@ public class Wikipedia {
 
 		String theurl = endPoint + term.replace(" ", "%20");
 
+		/*
+		 * Start download content from wikipedia topic page
+		 * Write content to a file
+		 */
 		try {
 			URL url = new URL(theurl);
 			data = Jsoup.parse(url, 10000).text();
@@ -59,14 +75,20 @@ public class Wikipedia {
 		return data.trim();
 	}
 
+	/*
+	 * Process the data file using Maui to get key file
+	 */
 	public void getWikiTopics(HashMap<String, Float> weights, Float float1) {
 		// TODO Auto-generated method stub
 		ArrayList<String> keyphrases = new ArrayList<>();
 
+		/*
+		 * Maui runs on text file to get key file
+		 */
 		wikiExtractKeyPhrases = new ExtractKeyPhrases();
-		// wikiExtractKeyPhrases.extract(Config.getMauiExtractionOptions(Config.tempLocation));
-		// String[] option = opts;
-		// option[1] = Config.tempLocation;
+
+		wikiKey = new HashMap();
+
 		wikiExtractKeyPhrases.extract(opts);
 
 		ArrayList<String> files = getFiles();
@@ -81,7 +103,7 @@ public class Wikipedia {
 					File keyFile = new File(filename);
 					if (keyFile.delete())
 						System.out.println("File " + keyFile + " is deleted!");
-					
+
 				} catch (Exception e) {
 					// TODO: handle exception
 					e.printStackTrace();
@@ -89,11 +111,21 @@ public class Wikipedia {
 
 				stop.truncate(keys);
 				for (String key : keys)
-					weights.put(key, float1 / keys.size());
+					try {
+						if (!weights.containsKey(key)) {
+							weights.put(key.toLowerCase(), float1 / keys.size());
+							wikiKey.put(key.toLowerCase(), float1 / keys.size());
+						}
+					} catch (Exception e) {
+						e.printStackTrace();
+					}
 			}
 		}
 	}
-
+	
+	/*
+	 * Get list of files in data/temp folder
+	 */
 	private ArrayList<String> getFiles() {
 		// TODO Auto-generated method stub
 		File dir = new File(Config.tempLocation);
@@ -110,6 +142,9 @@ public class Wikipedia {
 		return files;
 	}
 
+	/*
+	 * Get content of key file to an array list
+	 */
 	private ArrayList<String> processKeyFile(String filename) {
 		// TODO Auto-generated method stub
 		result = new ArrayList<>();
@@ -126,4 +161,10 @@ public class Wikipedia {
 
 		return result;
 	}
+
+	public HashMap<String, Float> getWikiKey() {
+		// TODO Auto-generated method stub
+		return wikiKey;
+	}
+
 }

@@ -18,7 +18,10 @@ import javax.crypto.CipherOutputStream;
 import javax.crypto.SecretKey;
 import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.DESKeySpec;
-
+/*
+ * Cipher: encrypt and decrypt documents
+ * Take the file name for encrypting/decrypting file
+ */
 public class CipherFile {
 
 	public void encrypt(String encryptionKey, String file) throws Throwable {
@@ -30,14 +33,16 @@ public class CipherFile {
 		// TODO Auto-generated method stub
 		encryptOrDecrypt(encryptionKey, Cipher.DECRYPT_MODE, file);
 	}
-	
+	/*
+	 * Using DES method and encryptionKey to encrypt/decrypt file
+	 */
 	private void encryptOrDecrypt(String encryptionKey, int mode, String file) throws Throwable {
 		// TODO Auto-generated method stub
 		File fileToCipher = new File(file);
 		FileInputStream fis = new FileInputStream(file);
 		
 		String filename = fileToCipher.getName();
-		File encryptedFile = new File("data" + File.separator + filename);
+		File encryptedFile = new File(filename);
 		if(encryptedFile.exists())
 			encryptedFile.delete();
 		encryptedFile.createNewFile();
@@ -60,6 +65,9 @@ public class CipherFile {
 		Files.move(encryptedFile.toPath(), fileToCipher.toPath(), REPLACE_EXISTING);
 	}
 
+	/*
+	 * Copy data from stream to stream
+	 */
 	private void copy( InputStream is, OutputStream os) throws IOException{
 		// TODO Auto-generated method stub
 		byte[] bytes = new byte[64];
@@ -73,6 +81,9 @@ public class CipherFile {
 	}
 
 
+	/*
+	 * Hashing data using hash code
+	 */
 	public void hash(String file) {
 		// TODO Auto-generated method stub
 		

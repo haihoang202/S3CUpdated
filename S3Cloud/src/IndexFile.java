@@ -16,6 +16,12 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 
+/*
+ * IndexFile contains index table, document size table 
+ * - Index table: hashed keyword mapped with associated files
+ * - Document size: file name and its size in bytes
+ * 
+ */
 public class IndexFile {
 	private static HashMap<String, Long> documentSizes;
 	private static File indexFile;
@@ -25,6 +31,7 @@ public class IndexFile {
 	private static BufferedReader br;
 	private static String line;
 	
+	//Constructor
 	public IndexFile() throws IOException {
 		documentSizes = new HashMap<>();
 		indexTable = new HashMap<>();
@@ -33,14 +40,17 @@ public class IndexFile {
 		docSizeFile = null;
 		indexFile= null;
 		
-		prepareDocSizeFile();
 		prepareIndexTable();
-
+		prepareDocSizeFile();
+		
 	}
 
+	/*
+	 * Prepare index table depend on chosen method from config.properties file
+	 */
 	private void prepareIndexTable() throws IOException {
 		// TODO Auto-generated method stub
-		indexFile = new File(Config.indexFile);
+		indexFile = new File(Config.utilitiesLocation + File.separator + Config.indexFile);
 
 		if (!indexFile.exists())
 			indexFile.createNewFile();
@@ -59,6 +69,9 @@ public class IndexFile {
 		
 	}
 	
+	/*
+	 * Add data to index table
+	 */
 	public void addToPostingList(String topic, String filename) {
 		// TODO Auto-generated method stub
 		if(!indexTable.containsKey(topic)) {
@@ -70,6 +83,9 @@ public class IndexFile {
 		}
 	}
 
+	/*
+	 * Read data from Index file to store to index table
+	 */
 	private void readInvertedIndexStyle() {
 		// TODO Auto-generated method stub
 		try {
@@ -95,9 +111,12 @@ public class IndexFile {
 		
 	}
 
+	/*
+	 * Add data to document size
+	 */
 	private void prepareDocSizeFile() throws IOException {
 		// TODO Auto-generated method stub
-		docSizeFile = new File(Config.docSizeFile);
+		docSizeFile = new File(Config.utilitiesLocation + File.separator + Config.docSizeFile);
 
 		if (!docSizeFile.exists())
 			docSizeFile.createNewFile();
@@ -120,6 +139,9 @@ public class IndexFile {
 		return documentSizes;
 	}
 
+	/*
+	 * Write data from index table back to the index file (for storing purpose)
+	 */
 	public void writeIndexTableToIndexFile() {
 		// TODO Auto-generated method stub
 		File newIndexFile = new File(Config.utilitiesLocation + File.separator + "tempIndex.txt");
@@ -139,10 +161,10 @@ public class IndexFile {
 				}
 				bw.write(line.toString());
 				bw.newLine();
+				line = new StringBuilder();
 			}
 			
 			bw.close();
-			//			newIndexFile.delete();
 			
 		} catch (Exception e) {
 			// TODO Auto-generated catch block
@@ -161,6 +183,9 @@ public class IndexFile {
 
 	}
 
+	/* 
+	 * Write document size to document size file (for storing purpose)
+	 */
 	public void writeDocumentSizesToDocSizes() {
 		// TODO Auto-generated method stub
 		File newDocSizesFile = new File(Config.utilitiesLocation + File.separator + "tempDocSizes.txt");
@@ -173,6 +198,8 @@ public class IndexFile {
 				
 				bw.write(sb.toString());
 				bw.newLine();
+				
+				sb = new StringBuilder();
 			}
 			bw.close();
 			

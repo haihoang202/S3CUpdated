@@ -17,7 +17,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-
+/*
+ * Receive and process files being uploaded from the client
+ * - Retrieving encrypted text files and key files from the client,
+ * - Store the encrypted plain text to designed place
+ * - Read encrypted keyfile and add to index table
+ * - Write the index table to the index file
+ */
 public class RetrieveUploadedFiles {
 	
 	IndexFile index;
@@ -45,11 +51,15 @@ public class RetrieveUploadedFiles {
 		
 	}
 
+	/*
+	 * Open socket on designed port
+	 * Prepare to receive files from client
+	 */
 	private void openConnection() {
 		// TODO Auto-generated method stub
 		try {
 			servsoc = new ServerSocket(Config.uploadPort);
-			System.out.println("Now listening on port " + Config.uploadPort);
+			System.out.println("Now listening to upload request on port " + Config.uploadPort);
 			sock = servsoc.accept();
 			System.out.println("Accepted connection to: " + sock);
 			
@@ -62,13 +72,17 @@ public class RetrieveUploadedFiles {
 		}
 	}
 	
+	/*
+	 * Read file name, file size, actual byte from the client 
+	 * Store the data to file in watch folder
+	 */
 	private void getAndStoreFile() {
 		// TODO Auto-generated method stub
 		int fileSize;
 		String fileName = "prebirthfile";
 		int bytesRead;
 		int current = 0;
-		BufferedOutputStream bos = null;
+		BufferedOutputStream bos;
 		byte[] fileBytes;
 		
 		for(int i = 0 ; i< numFiles; i++){
@@ -83,12 +97,13 @@ public class RetrieveUploadedFiles {
 				if(storeFile.exists())
 					storeFile.delete();
 				storeFile.createNewFile();
-
-				bos = new BufferedOutputStream(new FileOutputStream(storeFile));
+				
+	            bos = new BufferedOutputStream(new FileOutputStream(storeFile));
 				
 				bytesRead = dis.read(fileBytes, 0, fileSize);
 				current = bytesRead;
 				
+				//Check in case the byte data is not all read through, try to read the rest 
 				if(bytesRead != fileSize){
 					int numTry = 0;
 					do {
@@ -100,14 +115,14 @@ public class RetrieveUploadedFiles {
 				
 				bos.write(fileBytes);
 				bos.flush();
-				
+				bos.close();
+				System.out.println("Done!");
 			} catch (Exception e) {
 				// TODO: handle exception
 				System.err.println(this.getClass().getName() + ": 123 " + fileName + " " + e.getMessage());
 			}
 		}
 		try {
-			bos.close();
 			dis.close();
 //			dos.close();
 		} catch (IOException e) {
@@ -116,6 +131,10 @@ public class RetrieveUploadedFiles {
 		}
 	}
 
+	/*
+	 * Post process, store encrypted text files and encrypted keyword files in correct folder
+	 * Write to index file and document size
+	 */
 	private void postProcess() {
 		// TODO Auto-generated method stub
 		getFileList();
@@ -124,7 +143,7 @@ public class RetrieveUploadedFiles {
 			if (file.endsWith(".txt")){
 				processTextFile(file);
 			} else if (file.endsWith(".key")){
-//				processKeyFile(file);
+				processKeyFile(file);
 			}
 		}
 		
@@ -143,6 +162,9 @@ public class RetrieveUploadedFiles {
 		
 	}
 
+	/*
+	 * Store encrypted key file, close opening stream
+	 */
 	private void processKeyFile(String file) {
 		// TODO Auto-generated method stub
 		File keyFile = new File(file);
@@ -172,6 +194,9 @@ public class RetrieveUploadedFiles {
 		keyFile.delete();
 	}
 
+	/*
+	 * Store encrypted text file, close opening stream
+	 */
 	private void processTextFile(String file) {
 		// TODO Auto-generated method stub
 		File textFile = new File(file);
@@ -188,6 +213,9 @@ public class RetrieveUploadedFiles {
 		textFile.delete();
 	}
 
+	/*
+	 * Get list of file in watch folder
+	 */
 	private ArrayList<String> getFileList() {
 		// TODO Auto-generated method stub
 		File dir = new File(Config.watchLocation);
@@ -204,6 +232,9 @@ public class RetrieveUploadedFiles {
 		return null;
 	}
 
+	/*
+	 * Close opening connection, socket
+	 */
 	private void closeConnection() {
 		// TODO Auto-generated method stub
 		try {

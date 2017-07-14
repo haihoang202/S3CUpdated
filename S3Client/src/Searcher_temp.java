@@ -17,8 +17,8 @@ import java.util.Map.Entry;
  * @author Hoang Pham
  *
  */
-public class Searcher {
-	private static float CORE_WEIGHT = 1.0f;
+public class Searcher_temp {
+	float CORE_WEIGHT = 1.0f;
 	String query;
 	HashMap<String, Float> weights;
 	ArrayList<String> queryVector;
@@ -31,7 +31,7 @@ public class Searcher {
 	HashMap<String, Float> synonymsKey;
 
 	// Constructor
-	public Searcher() {
+	public Searcher_temp() {
 		this.query = "";
 		this.weights = new HashMap<>();
 		this.queryVector = new ArrayList<>();
@@ -52,7 +52,7 @@ public class Searcher {
 	 * @param query
 	 */
 
-	public void search(String searchterm, int opt) {
+	public void search(String searchterm) {
 		// TODO Auto-generated method stub
 		query = searchterm;
 		queries = stop.truncate(query);
@@ -61,7 +61,7 @@ public class Searcher {
 
 		shuffleQuery(queries);
 
-		createTrapdoor(queries, opt);
+		createTrapdoor(queries);
 
 		encryptedTrapdoor(weights);
 
@@ -78,7 +78,7 @@ public class Searcher {
 	 * 
 	 * @param query_phrase
 	 */
-	private void shuffleQuery(String[] query_phrase) {
+	public void shuffleQuery(String[] query_phrase) {
 		// TODO Auto-generated method stub
 		/**
 		 * Shuffle to get combination
@@ -126,7 +126,7 @@ public class Searcher {
 		this.queries = res.toArray(a);
 	}
 
-	public static void Permutation(String prefix, ArrayList<String> s, ArrayList<String> r){
+	public void Permutation(String prefix, ArrayList<String> s, ArrayList<String> r){
 		int n = s.size();
 		if (n == 0) 
 			r.add(prefix);
@@ -150,70 +150,11 @@ public class Searcher {
 	 * - 3: just wiki
 	 * @param queries
 	 */
-	private void createTrapdoor(String[] queries, int opt) {
-		for (String term : queries) {
-			if (term != "") {
+	public void createTrapdoor(String[] queries) {
 				
-				if (term.charAt(term.length()-1) == ' ')
-					term = term.substring(0, term.length()-1);
-				
-				float termweight = (CORE_WEIGHT / queries.length) * term.split(" ").length;
-				
-				weights.put(term, termweight);
-
-				ArrayList<String> synonyms = new ArrayList<>();
-				
-				switch (opt) {
-				case 0:
-					break;
-				case 1:
-					synonyms = thesaurus.getSynonym(term);
-					for (String syn : synonyms) {
-						syn = syn.toLowerCase();
-
-						if (!weights.containsKey(syn)) {
-							weights.put(syn, termweight / synonyms.size());
-							synonymsKey.put(syn, termweight / synonyms.size());
-						}
-					}
-					
-					wikipedia.downloadWikiContent(term);
-					break;
-				case 2:
-					synonyms = thesaurus.getSynonym(term);
-					for (String syn : synonyms) {
-						syn = syn.toLowerCase();
-
-						if (!weights.containsKey(syn)) {
-							weights.put(syn, termweight / synonyms.size());
-							synonymsKey.put(syn, termweight / synonyms.size());
-						}
-					}
-					break;
-				case 3:
-					wikipedia.downloadWikiContent(term);
-					break;
-				}
-			}
-		}
-		
-		if (queries.length > 0 & (opt == 1 | opt == 3)) {
-			wikipedia.getWikiTopics(weights, weights.get(query));
-			System.out.println("Wikipedia expansion: " + wikipedia.getWikiKey());
-		}
-		
-		if (opt == 1 | opt == 2) {
-			System.out.println("Synonyms expansion: " + synonymsKey);
-		}
-		
-		System.out.print("Query extension: ["); 
-		for (String i : queries) 
-			System.out.print(i + " ");
-		System.out.println("]");
-		
 	}
 
-	private void encryptedTrapdoor(HashMap<String, Float> weights2) {
+	public void encryptedTrapdoor(HashMap<String, Float> weights2) {
 		// TODO Auto-generated method stub
 		for (String term : weights2.keySet()) {
 			this.queryVector.add(term.hashCode() + "");
@@ -221,7 +162,7 @@ public class Searcher {
 		}
 	}
 
-	private void sendToCloud(HashMap<String, Float> weights2) {
+	public void sendToCloud(HashMap<String, Float> weights2) {
 		// TODO Auto-generated method stub
 
 		try {
@@ -245,9 +186,10 @@ public class Searcher {
 		// TODO Auto-generated method stub
 		int i = 1;
 		for (Entry<String, Double> entry : this.searchResult.entrySet()) {
+			if(i > Config.maxSearchResults)
+				break;
 			System.out.println(i + " - Document " + entry.getKey() + " has score: " + entry.getValue());
 			i++;
 		}
 	}
-
 }

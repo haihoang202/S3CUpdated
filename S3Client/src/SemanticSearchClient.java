@@ -9,7 +9,7 @@ public class SemanticSearchClient {
  *  	+ Upload: -u
  *  	+ Remove: -r
  *  	+ Decrypt: -d
- *  
+ *  - Upon user command, ask for additional information 
  * @param args
  */
 	private static String option;
@@ -36,16 +36,47 @@ public class SemanticSearchClient {
 		option = scan.nextLine();
 		
 		switch (option) {
-		
-			case "-s": //Searching part
+			/*
+			 * Searching part
+			 * - Ask for query
+			 * - Search option: 
+			 * 		* 0: query combination only
+			 * 		* 1: query combination + wikipedia + synonym  
+			 * 		* 2: query combination + synonym
+			 * 		* 3: query combination + wikipedia
+			 */
+			case "-s": 
 				System.out.println("Search for:");
 				query = scan.nextLine();
+				System.out.println("Option:");
+				int opt = scan.nextInt();
 				
-				Searcher searcher = new Searcher();
-				searcher.search(query);
-				searcher.displayResults();
+				Searcher_temp searcher; 
+				switch(opt){
+				case 0:
+					searcher = new SearcherKWO();
+					searcher.search(query);
+					break;
+				case 1:
+					searcher = new SearcherWKSN();
+					searcher.search(query);
+					break;
+				case 2:
+					searcher = new SearcherSN();
+					searcher.search(query);
+					break;
+				case 3:
+					searcher = new SearcherWK();
+					searcher.search(query);
+					break;
+				}
 				break;
-			case "-u": //Uploading part
+			
+			/*
+			 * Uploading part
+			 * - Ask for upload folder
+			 */
+			case "-u": 
 				System.out.println("Enter the upload folder:");
 				query = scan.nextLine();
 				
@@ -59,14 +90,24 @@ public class SemanticSearchClient {
 					uploader.upload();
 				}
 				break;
-			case "-r": //Removing part
+				
+			/*
+			 * Removing part
+			 * - Ask for file to remove
+			 */
+			case "-r": 
 				System.out.println("Enter the file to remove:");
 				query = scan.nextLine();
 				
 				Remover remover = new Remover();
 				remover.remove(query);
 				break;
-			case "-d": //Decrypting part
+			
+			/*
+			 * Decrypting part
+			 * - Ask for file to decrypt
+			 */
+			case "-d": 
 				System.out.println("Ener the file to be decrypted:");
 				query = scan.nextLine();
 				

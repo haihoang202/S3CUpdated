@@ -9,12 +9,17 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 
+/*
+ * Remove redundant, "stopword" from the given data
+ * List of word defined as stopword is stored in a file named in config.properties
+ */
 public class StopwordRemover {
 	private String[] queries;
 	private HashSet<String> stopSet;
 	private BufferedReader br;
 	private ArrayList<String> removedlist;
 	
+	//Constructor
 	public StopwordRemover(){
 		String location = Config.stopWordsLocation;
 		File stopWordFile = new File(location);
@@ -40,11 +45,12 @@ public class StopwordRemover {
 				
 	}
 	
+	/*
+	 * Remove stop word from a string
+	 */
 	public String[] truncate(String query) {
 		// TODO Auto-generated method stub
 		queries = query.split(" ");
-		
-//		System.out.println(queries);
 		
 		for (String i : queries)
 			if(!stopSet.contains(i) && i != null) 
@@ -55,12 +61,13 @@ public class StopwordRemover {
 		return queries;
 	}
 	
+	/*
+	 * Remove stop word from a collection
+	 */
 	public ArrayList<String> truncate(ArrayList<String> collection){
 		for (String i : collection)
 			if(!stopSet.contains(i) && i != null) 
 				removedlist.add((String) i);
-		
-//		queries = removedlist.toArray(new String[removedlist.size()]);
 		
 		return removedlist;
 	}

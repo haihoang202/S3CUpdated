@@ -9,6 +9,10 @@ import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 
+/*
+ * API call to WordNik to get their synonym and related words 
+ * Preprocess the JSON response to ArrayList of synonyms
+ */
 public class Thesaurus {
 	private String api_key = "api_key=a2a73e7b926c924fad7001ca3111acd55af2ffabf50eb4ae5";
 	private String url = "http://api.wordnik.com:80/v4/word.json/";
@@ -22,6 +26,9 @@ public class Thesaurus {
 			return new ArrayList<>();
 		
 		try{
+			/*
+			 * Making GET request to the API
+			 */
 			URL request_url = new URL(this.url+term.replace(" ", "%20")+this.option+this.api_key);
 			System.out.println("Term is: " + term);
 			System.out.println(request_url.toExternalForm());
@@ -31,7 +38,9 @@ public class Thesaurus {
 			System.out.println("Sending request to "+request_url);
 			System.out.println("Response code is: "+rc);
 			
-			
+			/*
+			 * Get JSON response and process to array list
+			 */
 			if(rc == 200){
 				String line = null;
 				BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));

@@ -1,5 +1,9 @@
 import java.util.Comparator;
 
+/*
+ * Class of document with its name and score 
+ * Also an override method to compare ScoredDocument with others
+ */
 public class ScoredDocument {
 	public String docName;
 	public double score;

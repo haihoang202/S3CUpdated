@@ -1,6 +1,9 @@
 import maui.main.MauiModelBuilder;
 import maui.main.MauiTopicExtractor;
 
+/*
+ * Use Maui to extract keyword from text file to key file
+ */
 public class ExtractKeyPhrases {
 
 	private MauiModelBuilder modelBuilder;

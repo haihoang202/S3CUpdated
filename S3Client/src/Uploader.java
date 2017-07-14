@@ -16,6 +16,14 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+/*
+ * Upload class in client side:
+ * 4 main steps:
+ * - extract keyword from the file
+ * - encrypted keyword and plain text data
+ * - send encrypted files and hashed keyword to the server
+ * - clean up opening stream and buffer, delete file after uploads
+ */
 public class Uploader {
 
 	String path;
@@ -24,7 +32,17 @@ public class Uploader {
 	ArrayList<String> fileList;
 	StopwordRemover stop;
 	Socket socket;
+	public static String [] mauiKeyOptions = {
+			"-l", "data/tmp/", "-m", "keyphrextr", "-t", "PorterStemmer", "-v", "none"
+	    };
+	
+	public static String[] getMauiExtractionOptions(String path) {
+        String [] options = mauiKeyOptions;
+        options[1] = path;
+        return options;
+    }
 
+	//Constructor
 	public Uploader(String uploadFolder) {
 		this.path = uploadFolder;
 
@@ -39,6 +57,7 @@ public class Uploader {
 		socket = null;
 	}
 
+	//abstract class to upload documents
 	public void upload() {
 		// TODO Auto-generated method stub
 		getFileList();
@@ -52,6 +71,9 @@ public class Uploader {
 		cleanUp(); // Clean up key file and encrypted file
 	}
 
+	/*
+	 * Delete file from the upload folder after uploading them to the cloud
+	 */
 	private void cleanUp() {
 		// TODO Auto-generated method stub
 		for (String i : fileList) {
@@ -62,6 +84,10 @@ public class Uploader {
 		}
 	}
 
+	/*
+	 * Open socket to server side and upload ALL files (hashed keyword file and encrypted file)
+	 * to the cloud
+	 */
 	private void sendFile() {
 		// TODO Auto-generated method stub
 		boolean success = false;
@@ -99,6 +125,9 @@ public class Uploader {
 		}
 	}
 
+	/*
+	 * Write file name, file size and byte to write through stream
+	 */
 	private void uploadFileOnNetwork(DataOutputStream dos, Socket sock, String filename) {
 		// TODO Auto-generated method stub
 		FileInputStream fis;
@@ -124,13 +153,19 @@ public class Uploader {
 		}
 	}
 
+	/*
+	 * Use cipher to encrypted .txt file 
+	 * Hash the keyword for the .key file
+	 */
 	private void encryptFiles() {
 		// TODO Auto-generated method stub
 		fileList.stream().forEach((String file) -> {
 			try {
 				if (file.endsWith(".txt")) {
+					System.out.println("Encrypting file " + file);
 					cipher.encrypt(Config.encryptionKey, file);
 				} else if (file.endsWith(".key")) {
+					System.out.println("Hashing file " + file);
 					splitKeyword(file);
 					cipher.hash(file);
 				}
@@ -140,6 +175,9 @@ public class Uploader {
 		});
 	}
 
+	/*
+	 * Use linked hash set to add unique word to the key file 
+	 */
 	private void splitKeyword(String file) {
 		// TODO Auto-generated method stub
 		try {
@@ -155,14 +193,12 @@ public class Uploader {
 			}
 
 			br.close();
-			// String[] temp = new String[lines.size()];
-			// lines.toArray(temp);
 
-			ArrayList<String> temp = new ArrayList<>(lines);
-			temp = stop.truncate(temp);
+//			ArrayList<String> temp = new ArrayList<>(lines);
+//			temp = stop.truncate(temp);
 
 			BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-			for (String i : temp) {
+			for (String i : lines) {
 				bw.write(i);
 				bw.newLine();
 			}
@@ -176,39 +212,28 @@ public class Uploader {
 		}
 	}
 
+	/*
+	 * Use Maui to extract the .txt file to .key file which contains important keyword 
+	 */
 	private void extractKey() {
 		// TODO Auto-generated method stub
-
-		String[] opts = { "-l", "data/tmp", "-m", "keyphrextr", "-t", "PorterStemmer", "-v", "none", "-n", "10" };
-
-		for (String file : fileList) {
-			if (file.endsWith(".key")) {
-				File thisfile = new File(file);
-				thisfile.delete();
-			} else if (file.endsWith(".txt")) {
-				File thisfile = new File(file);
-				int filesize = (int) Integer.parseInt(opts[opts.length - 1]);
-				if (thisfile.exists())
-					filesize = ((Double) (thisfile.length() * 0.1)).intValue();
-				if (filesize < 1000)
-					filesize = 20;
-				else
-					filesize = (int) (filesize * 0.05);
-				opts[1] = this.path;
-				opts[opts.length - 1] = String.valueOf(filesize);
-				try {
-					String [] optclone = opts.clone();
-					extractKP.extract(optclone);
-				} catch (Exception e) {
-					System.err.println("Maui extracting issue!");
-				}
-			}
-		}
+		String[] options = getMauiExtractionOptions(path);
+        //Attempt to extract the keywords
+        try {
+            //Uses Maui to make the .key files
+            extractKP.extract(options);
+        } catch(Exception e) {
+            System.err.println("Problem extracting from Maui");
+            e.printStackTrace();
+        }
 
 		getFileList();
 
 	}
 
+	/*
+	 * Get list of files from the upload folder
+	 */
 	private ArrayList<String> getFileList() {
 		// TODO Auto-generated method stub
 		File dir = new File(this.path);
